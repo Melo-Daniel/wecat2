@@ -30,5 +30,31 @@ class Usuario extends DB{
     $stm = DB::prepare($sql);
     return $stm->execute();
   }
+  public function login($email,$senha){
+    $sql = "select usr_id from tb_usuarios where usr_email = '$email' and usr_senha = '$senha'";
+    $stm = DB::prepare($sql);
+    $stm->execute();
+    return $stm->fetch();
+  }
+
+  public function listarUsuario($id){
+    $sql = "select * from tb_usuarios where usr_id = $id";
+    $stm = DB::prepare($sql);
+    $stm->execute();
+    return $stm->fetch();
+  }
+  public function listarUsuarios(){
+    $sql = "select usr_id, usr_nome from tb_usuarios";
+    $stm = DB::prepare($sql);
+    $stm->execute();
+
+
+    $ser = array();
+    foreach ($stm->fetchAll() as $key => $value) {
+      $ser['Lojas'][] = $value;
+    }
+
+    echo json_encode($ser);
+  }
 }
  ?>

@@ -1,4 +1,28 @@
 <?php
+
+session_start();
+require_once 'lib/categoria.php';
+require_once 'lib/Produto.php';
+$usr = $_SESSION['usr'];
+
+if(isset($_POST['salvar'])){
+  $p = new Produto();
+
+  $p->setNome($_POST['nome']);
+  $p->setDetalhes($_POST['detalhes']);
+  $p->setPreco($_POST['preco']);
+  $p->setStatus(1);
+  $p->setUsuario($_SESSION['usr']);
+  $p->setCategoria($_POST['categoria']);
+  $p->setCodigo($_POST['codigo']);
+  $p->setImg('asd.jpg');
+
+  if($p->adicionarProduto($p)){
+    header('Location:novoProduto.php');
+  }else{
+    echo 'erro';
+  }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -26,11 +50,34 @@
 
     <link href="css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
 <script type="text/javascript">
+function adicionarProduto(){
+  var nome = document.getElementById('nome').value;
+  var detalhes = document.getElementById('detalhes').value;
+  var preco = document.getElementById('preco').value;
+  var codigo = document.getElementById('codigo').value;
+  var categoria = document.getElementById('categoria').value;
 
+  $.post("actions/ProdutoAC.php",
+  {
+      op:1,
+      nome:nome,
+      codigo:codigo,
+      detalhes:detalhes,
+      preco:preco,
+      categoria:categoria
+  },
+  function(data,status){
+    if(data == 'ok'){
+      location.reload();
+    }else{
+      alert(data);
+    }
+  });
+}
 </script>
 </head>
 
-<body class="mini-navbar">
+<body>
 
     <div id="wrapper">
 
@@ -56,25 +103,18 @@
                         W+
                     </div>
                 </li>
-                <!-- Inicio menu lateral -->
+                <!--Inicio menu lateral-->
                 <li>
-                    <a href="principal.php"><i class="fa fa-line-chart"></i> <span class="nav-label">Geral</span></a>
-                </li>
-
-                <li>
-                    <a href="novapeca.php"><i class="fa fa-th-large"></i> <span class="nav-label">Estoque</span></a>
-                </li>
-
-                <li>
-                    <a href="servico.php"><i class="fa fa-wrench"></i> <span class="nav-label">Serviços</span></a>
+                    <a href="index.html"><i class="fa fa-th-large"></i> <span class="nav-label">Minha Galeria</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="categoria.php">Categorias</a></li>
+                        <li><a href="novoProduto.php">Produtos</a></li>
+                    </ul>
                 </li>
                 <li>
-                    <a href="cliente.php"><i class="fa fa-user"></i> <span class="nav-label">Clientes</span></a>
+                    <a href="#"><i class="fa fa-dollar"></i> <span class="nav-label">Ofertas</span></span></a>
                 </li>
-                <li>
-                    <a href="colaboradores.php"><i class="fa fa-user-o"></i> <span class="nav-label">Colaboradores</span></a>
-                </li>
-                <!-- Fim menu lateral -->
+                <!--Fim menu lateral-->
             </ul>
 
         </div>
@@ -217,8 +257,8 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="ibox float-e-margins collapsed">
-                        <div class="ibox-title">
-                            <h5>Cadastre um novo cliente</h5>
+                        <div class="ibox-title collapse-link">
+                            <h5>Cadastre um novo Produto</h5>
                             <div class="ibox-tools">
                                 <a class="collapse-link">
                                     <i class="fa fa-chevron-up"></i>
@@ -238,25 +278,33 @@
                             </div>
                         </div>
                         <div class="ibox-content">
-                            <form method="get" class="form-horizontal">
+                            <form method="post" class="form-horizontal" action="novoProduto.php">
                                 <div class="form-group"><label class="col-sm-2 control-label">Nome</label>
-                                    <div class="col-sm-10"><input type="text" id="nome" class="form-control"></div>
+                                    <div class="col-sm-10"><input type="text" name="nome" id="nome" class="form-control" required></div>
                                 </div>
                                 <div class="form-group"><label class="col-sm-2 control-label">Código</label>
-                                    <div class="col-sm-10"><input type="text" id="nome" class="form-control"></div>
+                                    <div class="col-sm-10"><input type="text" name="codigo" id="codigo" class="form-control"></div>
                                 </div>
-                                <div class="form-group"><label class="col-sm-2 control-label">Descrição</label>
-                                    <div class="col-sm-10"><input type="text" id="telefone" class="form-control"></div>
+                                <div class="form-group"><label class="col-sm-2 control-label">Detalhes</label>
+                                    <div class="col-sm-10"><input type="text" name="detalhes" id="detalhes" class="form-control"></div>
                                 </div>
                                 <div class="form-group"><label class="col-sm-2 control-label">Valor</label>
-                                    <div class="col-sm-10"><input type="text" id="descricao" class="form-control"></div>
+                                    <div class="col-sm-10"><input type="text" name="preco" id="preco" class="form-control"></div>
                                 </div>
                                 <div class="form-group"><label class="col-sm-2 control-label">Categoria</label>
-                                    <div class="col-sm-10"><select class="form-control" name="">
-                                      <option value="option">Selecione uma categoria</option>
+                                    <div class="col-sm-10"><select class="form-control" name="categoria" id="categoria">
+                                      <option value="0">Selecione uma categoria</option>
+                                      <?php
+                                        $c = new Categoria();
+                                        foreach ($c->listarCategorias($usr) as $key => $value) {
+                                          ?>
+                                            <option value="<?php echo $value->cat_id?>"><?php echo $value->cat_categoria?></option>
+                                          <?php
+                                        }
+                                       ?>
                                     </select></div>
                                 </div>
-                                <div class="form-group"><label class="col-sm-2 control-label">Categoria</label>
+                                <div class="form-group"><label class="col-sm-2 control-label">Imagem</label>
                                   <div class="col-sm-10">
                                     <div class="fileinput fileinput-new" data-provides="fileinput">
                                       <span class="btn btn-default btn-file"><span class="fileinput-new">Selecione um arquivo</span><span class="fileinput-exists">Mudar</span><input type="file" name="..."></span>
@@ -268,7 +316,7 @@
 
                                 <div class="hr-line-dashed"></div>
                                 <div class="form-group">
-                                        <button class="btn btn-primary" type="button" onclick="inserirCliente()" style="float:right; margin-left:10px">Salvar</button>
+                                        <button class="btn btn-primary" type="submit" style="float:right; margin-left:10px" name="salvar">Salvar</button>
                                         <button class="btn btn-white" type="reset" style="float:right">Cancelar</button>
                                 </div>
                             </form>
@@ -276,6 +324,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-lg-12">
                 <div class="ibox float-e-margins">
@@ -305,22 +354,34 @@
                     <table class="table table-striped table-bordered table-hover dataTables-example" >
                     <thead>
                     <tr>
+                        <th>COD</th>
                         <th>NOME</th>
-                        <th>TELEFONE</th>
-                        <th>CARRO</th>
-                        <th>PLACA</th>
+                        <th>DETALHES</th>
+                        <th>VALOR</th>
                     </tr>
                     </thead>
                     <tbody>
-
+                      <?php
+                      $pro = new Produto();
+                        foreach ($pro->listarProdutos($_SESSION['usr']) as $key => $value) {
+                          ?>
+                        <tr>
+                          <td><?php echo $value->pro_codigo ?></td>
+                          <td><?php echo $value->pro_nome ?></td>
+                          <td><?php echo $value->pro_detalhes ?></td>
+                          <td><?php echo $value->pro_preco ?></td>
+                        </tr>
+                          <?php
+                        }
+                       ?>
 
                     </tbody>
                     <tfoot>
                     <tr>
+                        <th>COD</th>
                         <th>NOME</th>
+                        <th>DETALHES</th>
                         <th>TELEFONE</th>
-                        <th>CARRO</th>
-                        <th>PLACA</th>
                     </tr>
                     </tfoot>
                     </table>

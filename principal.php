@@ -1,4 +1,36 @@
 <?php
+session_start();
+if(!isset($_SESSION['usr'])){
+  header('Location:index.php');
+}
+
+require_once 'lib/categoria.php';
+require_once 'lib/Produto.php';
+$c = new Categoria();
+
+if(isset($_POST['adicionar'])){
+  if($c->inserirCategoria($_POST['categoria'],$_SESSION['usr'])){
+    header('Location:principal.php');
+  }
+}
+if(isset($_POST['adicionarProduto'])){
+  $p = new Produto();
+
+  $p->setNome($_POST['nome']);
+  $p->setDetalhes($_POST['detalhes']);
+  $p->setPreco($_POST['preco']);
+  $p->setStatus(1);
+  $p->setUsuario($_SESSION['usr']);
+  $p->setCategoria($_POST['categoria']);
+  $p->setCodigo($_POST['codigo']);
+  $p->setImg('asd.jpg');
+
+  if($p->adicionarProduto($p)){
+    header('Location:principal.php');
+  }else{
+    echo 'erro';
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,12 +45,56 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
     <link href="css/animate.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/plugins/dropzone/basic.css" rel="stylesheet">
+    <link href="css/plugins/dropzone/dropzone.css" rel="stylesheet">
+    <link href="css/plugins/jasny/jasny-bootstrap.min.css" rel="stylesheet">
+    <link href="css/plugins/codemirror/codemirror.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+<script>
+function adicionarProduto() {
+
+  var nome = document.getElementById('nome').value;
+  var detalhes = document.getElementById('detalhes').value;
+  var preco = document.getElementById('preco').value;
+  var codigo = document.getElementById('codigo').value;
+  var categoria = document.getElementById('categoria').value;
+
+  $.post("actions/ProdutoAC.php",
+  {
+      op:1,
+      nome:nome,
+      codigo:codigo,
+      detalhes:detalhes,
+      preco:preco,
+      categoria:categoria
+  },
+  function(data,status){
+    if(data == 'ok'){
+      location.reload();
+    }else{
+      alert(data);
+    }
+  });
+
+    var table = document.getElementById("myTable");
+    var row = table.insertRow(0);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    cell1.innerHTML = "NEW CELL1";
+    cell2.innerHTML = "NEW CELL2";
+}
+</script>
 
 </head>
 
-<body>
+<body class="mini-navbar">
 
     <div id="wrapper">
 
@@ -27,7 +103,6 @@
             <ul class="nav metismenu" id="side-menu">
                 <li class="nav-header">
                     <div class="dropdown profile-element"> <span>
-                            <img alt="image" class="img-circle" src="img/profile_small.jpg" />
                              </span>
                         <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                             <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">Daniel Melo</strong>
@@ -44,17 +119,18 @@
                         W+
                     </div>
                 </li>
-
+                <!--Inicio menu lateral-->
                 <li>
-                    <a href="index.html"><i class="fa fa-th-large"></i> <span class="nav-label">Minha Galeria</span> <span class="fa arrow"></span></a>
+                    <a href="index.html"><i class="fa fa-th-large"></i> <span class="nav-label">Galeria</span> <span class="fa arrow"></span></a>
                     <ul class="nav nav-second-level collapse">
                         <li><a href="categoria.php">Categorias</a></li>
                         <li><a href="novoProduto.php">Produtos</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#"><i class="fa fa-dollar"></i> <span class="nav-label">Ofertas</span></span></a>
+                    <a href="#"><i class="fa fa-star-o"></i> <span class="nav-label">Destaques</span></span></a>
                 </li>
+                <!--Fim menu lateral-->
             </ul>
 
         </div>
@@ -75,102 +151,6 @@
                 <li>
                     <span class="m-r-sm text-muted welcome-message">Bem Vindo ao WeCat :-)</span>
                 </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
-                        <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-messages">
-                        <li>
-                            <div class="dropdown-messages-box">
-                                <a href="profile.html" class="pull-left">
-                                    <img alt="image" class="img-circle" src="img/a7.jpg">
-                                </a>
-                                <div class="media-body">
-                                    <small class="pull-right">46h ago</small>
-                                    <strong>Mike Loreipsum</strong> started following <strong>Monica Smith</strong>. <br>
-                                    <small class="text-muted">3 days ago at 7:58 pm - 10.06.2014</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <div class="dropdown-messages-box">
-                                <a href="profile.html" class="pull-left">
-                                    <img alt="image" class="img-circle" src="img/a4.jpg">
-                                </a>
-                                <div class="media-body ">
-                                    <small class="pull-right text-navy">5h ago</small>
-                                    <strong>Chris Johnatan Overtunk</strong> started following <strong>Monica Smith</strong>. <br>
-                                    <small class="text-muted">Yesterday 1:21 pm - 11.06.2014</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <div class="dropdown-messages-box">
-                                <a href="profile.html" class="pull-left">
-                                    <img alt="image" class="img-circle" src="img/profile.jpg">
-                                </a>
-                                <div class="media-body ">
-                                    <small class="pull-right">23h ago</small>
-                                    <strong>Monica Smith</strong> love <strong>Kim Smith</strong>. <br>
-                                    <small class="text-muted">2 days ago at 2:30 am - 11.06.2014</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <div class="text-center link-block">
-                                <a href="mailbox.html">
-                                    <i class="fa fa-envelope"></i> <strong>Read All Messages</strong>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
-                        <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-alerts">
-                        <li>
-                            <a href="mailbox.html">
-                                <div>
-                                    <i class="fa fa-envelope fa-fw"></i> You have 16 messages
-                                    <span class="pull-right text-muted small">4 minutes ago</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a href="profile.html">
-                                <div>
-                                    <i class="fa fa-twitter fa-fw"></i> 3 New Followers
-                                    <span class="pull-right text-muted small">12 minutes ago</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a href="grid_options.html">
-                                <div>
-                                    <i class="fa fa-upload fa-fw"></i> Server Rebooted
-                                    <span class="pull-right text-muted small">4 minutes ago</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <div class="text-center link-block">
-                                <a href="notifications.html">
-                                    <strong>See All Alerts</strong>
-                                    <i class="fa fa-angle-right"></i>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-
 
                 <li>
                     <a href="login.html">
@@ -189,7 +169,7 @@
 
                 </div>
             </div>
-        <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="wrapper wrapper-content">
 
 
             <div class="row m-b-lg m-t-lg">
@@ -206,13 +186,16 @@
                                 </h2>
                                 <h4>Os melhores e mais bonitos você só encontra aqui</h4>
                                 <small>
-                                    Detalhes
+                                    <button type="button" class="btn btn-link" name="button">Editar</button>
                                 </small>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3"></div>
+                <div class="col-md-3">
+                  <span>Clique no botão abaixo para inserir uma nova Categoria!</span><br><br>
+                  <button type="button" class="btn btn-primary" name="addcategoria"  data-toggle="modal" data-target="#novaCategoria">Nova Categoria</button>
+                </div>
                   <div class="col-md-3">
                     <table class="table small m-b-xs">
                         <tbody>
@@ -240,99 +223,191 @@
 
             </div>
             <div class="row">
+
               <div class="col-lg-9">
+                <?php foreach ($c->listarCategorias($_SESSION['usr']) as $key => $value) {
+                  ?>
                 <div class="row">
                     <div class="col-lg-12">
                       <div class="row">
                           <div class="col-lg-12">
-                              <div class="ibox float-e-margins">
+                              <div class="ibox float-e-margins collapsed">
                                   <div class="ibox-title">
-                                      <h5>Categoria 1</h5>
-                                      <div class="ibox-tools">
+                                      <h5><?php echo $value->cat_categoria ?></h5>
+                                      <div class="ibox-tools collapse-link">
                                           <a class="collapse-link">
                                               <i class="fa fa-chevron-up"></i>
-                                          </a>
-                                          <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                              <i class="fa fa-wrench"></i>
-                                          </a>
-                                          <ul class="dropdown-menu dropdown-user">
-                                              <li><a href="#">Config option 1</a>
-                                              </li>
-                                              <li><a href="#">Config option 2</a>
-                                              </li>
-                                          </ul>
-                                          <a class="close-link">
-                                              <i class="fa fa-times"></i>
                                           </a>
                                       </div>
                                   </div>
                                   <div class="ibox-content">
-                                      <div class="carousel slide" id="carousel3">
-                                          <div class="carousel-inner">
-                                              <div class="item gallery active left">
-                                                  <div class="row">
-                                                      <div class="col-sm-6">
-                                                          <img alt="image" class="img-responsive" src="img/p_big1.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image" class="img-responsive" src="img/p_big2.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive"  src="img/p_big3.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive" src="img/p_big1.jpg">
-                                                      </div>
+                                    <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                        <thead>
+                                        <tr>
+
+                                            <th data-toggle="true">Nome</th>
+                                            <th data-hide="phone">Código</th>
+                                            <th data-hide="all">Detalhes</th>
+                                            <th data-hide="phone">Valor</th>
+                                            <th data-hide="phone">Status</th>
+                                            <th class="text-right" data-sort-ignore="true"></th>
+
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                          <?php
+                                          $p = new Produto();
+                                            foreach ($p->listarProdutosCategoria($_SESSION['usr'],$value->cat_id) as $key => $value1) {
+                                              ?>
+
+
+                                        <tr>
+                                            <td>
+                                               <?php echo $value1->pro_nome ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $value1->pro_codigo ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $value1->pro_detalhes ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $value1->pro_preco ?>
+                                            </td>
+
+                                            <td>
+                                                <span class="label label-primary">Disponível</span>
+                                            </td>
+
+                                            <td class="text-right">
+                                                <div class="btn-group">
+                                                    <button class="btn-white btn btn-xs">Ver</button>
+                                                    <button class="btn-white btn btn-xs">Editar</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <?php
+                                      }
+                                     ?>
+                                        </tbody>
+                                        <!-- Modal -->
+                                        <div class="row">
+                                          <div id="novoProduto<?php echo $value->cat_id?>" class="modal fade" role="dialog">
+                                            <div class="modal-dialog modal-md">
+                                              <!-- Modal content-->
+                                              <form method="post" class="form-horizontal" action="principal.php">
+                                              <div class="modal-content">
+                                                <div class="modal-header">
+                                                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                  <h4 class="modal-title">Novo Produto | <?php echo $value->cat_categoria ?></h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                  <input type="hidden" name="categoria" id="cat" value="<?php echo $value->cat_id ?>">
+                                                  <div class="form-group"><label class="control-label">Nome</label>
+                                                        <input type="text" class="form-control" name="nome" id="nome" value="" autofocus>
                                                   </div>
-                                              </div>
-                                              <div class="item gallery next left">
-                                                  <div class="row">
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive" src="img/p_big3.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive" src="img/p_big1.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive"  src="img/p_big2.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive" src="img/p_big1.jpg">
-                                                      </div>
+                                                  <div class="form-group"><label class="control-label">Codigo</label>
+                                                        <input type="text" class="form-control" name="codigo" id="codigo" value="" autofocus>
                                                   </div>
-                                              </div>
-                                              <div class="item gallery">
-                                                  <div class="row">
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive" src="img/p_big2.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive" src="img/p_big3.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image"  class="img-responsive"  src="img/p_big1.jpg">
-                                                      </div>
-                                                      <div class="col-sm-6">
-                                                          <img alt="image" class="img-responsive" src="img/p_big2.jpg">
-                                                      </div>
+                                                  <div class="form-group"><label class="control-label">Detalhes</label>
+                                                        <input type="text" class="form-control" name="detalhes" id="detalhes" value="" autofocus>
                                                   </div>
+                                                  <div class="form-group"><label class="control-label">Preço</label>
+                                                        <input type="text" class="form-control" name="preco" id="preco" value="" autofocus>
+                                                  </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                  <button type="submit" class="btn btn-primary" name="adicionarProduto">Adicionar</button>
+                                                </div>
                                               </div>
+                                            </form>
+                                            </div>
                                           </div>
-                                          <a data-slide="prev" href="#carousel3" class="left carousel-control">
-                                              <span class="icon-prev"></span>
-                                          </a>
-                                          <a data-slide="next" href="#carousel3" class="right carousel-control">
-                                              <span class="icon-next"></span>
-                                          </a>
-                                      </div>
+                                        </div>
+                                        <!--<tfoot>
+                                        <tr>
+                                            <td colspan="6">
+                                                <ul class="pagination pull-right">
+                                                  <li><a href="#">Adicionar Produto</a></li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                      </tfoot>-->
+                                    </table>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="ibox float-e-margins collapsed">
+                                              <ul class="pagination pull-right">
+                                                <li><a href="#" class="collapse-link">Adicionar Produto</a></li>
+                                              </ul>
+                                                <!--<div class="ibox-title collapse-link">
+                                                    <h5>Cadastre um novo Produto</h5>
+                                                    <div class="ibox-tools">
+                                                        <a class="collapse-link">
+                                                            <i class="fa fa-chevron-up"></i>
+                                                        </a>
+                                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                                            <i class="fa fa-wrench"></i>
+                                                        </a>
+                                                        <ul class="dropdown-menu dropdown-user">
+                                                            <li><a href="#">Config option 1</a>
+                                                            </li>
+                                                            <li><a href="#">Config option 2</a>
+                                                            </li>
+                                                        </ul>
+                                                        <a class="close-link">
+                                                            <i class="fa fa-times"></i>
+                                                        </a>
+                                                    </div>
+                                                </div> -->
+                                                <div class="ibox-content">
+                                                    <form method="post" class="form-horizontal" action="novoProduto.php">
+                                                        <div class="form-group"><label class="col-sm-2 control-label">Nome</label>
+                                                            <div class="col-sm-10"><input type="text" name="nome" id="nome" class="form-control" required></div>
+                                                        </div>
+                                                        <div class="form-group"><label class="col-sm-2 control-label">Código</label>
+                                                            <div class="col-sm-10"><input type="text" name="codigo" id="codigo" class="form-control"></div>
+                                                        </div>
+                                                        <div class="form-group"><label class="col-sm-2 control-label">Detalhes</label>
+                                                            <div class="col-sm-10"><input type="text" name="detalhes" id="detalhes" class="form-control"></div>
+                                                        </div>
+                                                        <div class="form-group"><label class="col-sm-2 control-label">Valor</label>
+                                                            <div class="col-sm-10"><input type="text" name="preco" id="preco" class="form-control"></div>
+                                                        </div>
+                                                        <div class="form-group"><label class="col-sm-2 control-label">Imagem</label>
+                                                          <div class="col-sm-10">
+                                                            <div class="fileinput fileinput-new" data-provides="fileinput">
+                                                              <span class="btn btn-default btn-file"><span class="fileinput-new">Selecione um arquivo</span><span class="fileinput-exists">Mudar</span><input type="file" name="..."></span>
+                                                              <span class="fileinput-filename"></span>
+                                                              <a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>
+                                                        <div class="form-group">
+                                                                <button class="btn btn-primary" type="submit" style="float:right; margin-left:10px" name="salvar">Salvar</button>
+                                                                <button class="btn btn-white" type="reset" style="float:right">Cancelar</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                   </div>
                               </div>
                           </div>
                       </div>
                     </div>
               </div>
-
+              <?php
+                }
+              ?>
             </div>
+
             <div class="col-lg-3">
               <div class="col-lg-12">
                 <div class="row">
@@ -364,6 +439,31 @@
         </div>
         </div>
 
+        <!-- Modal -->
+          <div id="novaCategoria" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-sm">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Nova Categoria</h4>
+                </div>
+                <div class="modal-body">
+
+                  <form method="post" class="form-horizontal" action="principal.php">
+                      <div class="form-group"><label class="control-label">Categoria</label>
+                            <input type="text" class="form-control" name="categoria" id="categoria" value="" autofocus>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" name="adicionar">Adicionar</button>
+                      </div>
+                  </form>
+
+                </div>
+              </div>
+            </div>
+          </div>
 
 
     <!-- Mainly scripts -->
@@ -375,6 +475,19 @@
     <!-- Custom and plugin javascript -->
     <script src="js/inspinia.js"></script>
     <script src="js/plugins/pace/pace.min.js"></script>
+
+    <!-- Jasny -->
+    <script src="js/plugins/jasny/jasny-bootstrap.min.js"></script>
+
+    <!-- DROPZONE -->
+    <script src="js/plugins/dropzone/dropzone.js"></script>
+
+    <!-- CodeMirror -->
+    <script src="js/plugins/codemirror/codemirror.js"></script>
+    <script src="js/plugins/codemirror/mode/xml/xml.js"></script>
+
+    <!-- iCheck -->
+    <script src="js/plugins/iCheck/icheck.min.js"></script>
 
     <!-- Sparkline -->
     <script src="js/plugins/sparkline/jquery.sparkline.min.js"></script>

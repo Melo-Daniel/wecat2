@@ -1,5 +1,16 @@
 <?php
+session_start();
 
+require_once 'lib/Usuario.php';
+
+if(isset($_POST['login'])){
+  $usr = new Usuario();
+  $u = $usr->login($_POST['email'],$_POST['senha']);
+  if($u->usr_id > 0){
+    $_SESSION['usr'] = $u->usr_id;
+    header('Location:principal.php');
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -34,14 +45,14 @@
                 <!--Continually expanded and constantly improved Inspinia Admin Them (IN+)-->
             </p>
             <p>Entre e veja como é!</p>
-            <form class="m-t" role="form" action="principal.php">
+            <form class="m-t" role="form" action="index.php" method="post">
                 <div class="form-group">
-                    <input type="email" class="form-control" placeholder="Usuário" required="">
+                    <input type="email" name="email" class="form-control" placeholder="Usuário" required="">
                 </div>
                 <div class="form-group">
-                    <input type="password" class="form-control" placeholder="Senha" required="">
+                    <input type="password" name="senha" class="form-control" placeholder="Senha" required="">
                 </div>
-                <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+                <button type="submit" name="login" class="btn btn-primary block full-width m-b">Login</button>
 
                 <a href="#"><small>Esqueceu a senha?</small></a>
                 <p class="text-muted text-center"><small>Não tem uma conta?</small></p>

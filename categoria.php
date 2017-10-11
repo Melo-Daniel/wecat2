@@ -1,4 +1,15 @@
 <?php
+
+session_start();
+require_once 'lib/categoria.php';
+
+$c = new Categoria();
+
+if(isset($_POST['adicionar'])){
+  if($c->inserirCategoria($_POST['categoria'],$_SESSION['usr'])){
+    header('Location:categoria.php');
+  }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -49,23 +60,18 @@
                         W+
                     </div>
                 </li>
-                <li>
-                    <a href="index.html"><i class="fa fa-th-large"></i> <span class="nav-label">Dashboards</span> <span class="fa arrow"></span></a>
-                    <ul class="nav nav-second-level collapse">
-                        <li><a href="index.html">Dashboard v.1</a></li>
-                        <li><a href="dashboard_2.html">Dashboard v.2</a></li>
-                        <li><a href="dashboard_3.html">Dashboard v.3</a></li>
-                        <li><a href="dashboard_4_1.html">Dashboard v.4</a></li>
-                        <li><a href="dashboard_5.html">Dashboard v.5 </a></li>
-                    </ul>
-                </li>
+                <!--Inicio menu lateral-->
                 <li>
                     <a href="index.html"><i class="fa fa-th-large"></i> <span class="nav-label">Minha Galeria</span> <span class="fa arrow"></span></a>
                     <ul class="nav nav-second-level collapse">
-                        <li><a href="#">Categorias</a></li>
-                        <li><a href="form_wizard.html">Produtos</a></li>
+                        <li><a href="categoria.php">Categorias</a></li>
+                        <li><a href="novoProduto.php">Produtos</a></li>
                     </ul>
                 </li>
+                <li>
+                    <a href="#"><i class="fa fa-dollar"></i> <span class="nav-label">Ofertas</span></span></a>
+                </li>
+                <!--Fim menu lateral-->
 
             </ul>
 
@@ -213,37 +219,59 @@
 
         <div class="wrapper wrapper-content animated fadeInRight">
             <div class="row">
-
-                  <div class="col-md-3">
-                      <div class="ibox">
-                          <div class="ibox-content product-box">
-
-                              <div class="product-imitation">
-                                  [ INFO ]
-                              </div>
-                              <div class="product-desc">
-
-                                  <small class="text-muted">Category</small>
-                                  <a href="#" class="product-name"> Product</a>
-
-
-
-                                  <div class="small m-t-xs">
-                                      Many desktop publishing packages and web page editors now.
-                                  </div>
-                                  <div class="m-t text-righ">
-
-                                      <a href="#" class="btn btn-xs btn-outline btn-primary">Info <i class="fa fa-long-arrow-right"></i> </a>
+                  <?php
+                    foreach ($c->listarCategorias($_SESSION['usr']) as $key => $value) {
+                      ?>
+                      <div class="col-md-3">
+                          <div class="ibox">
+                              <div class="ibox-content product-box">
+                                  <div class="product-desc">
+                                      <a href="Produto.php?c=<?php echo $value->cat_id ?>" class="product-name"><?php echo $value->cat_categoria ?></a>
                                   </div>
                               </div>
                           </div>
                       </div>
+                      <?php
+                    }
+                   ?>
+                   <div class="col-md-3">
+                       <div class="ibox">
+                           <div class="ibox-content product-box">
+                               <div class="product-desc">
+                                   <a href="#" class="product-name" data-toggle="modal" data-target="#myModal">Nova Categoria</a>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+              <!-- Modal -->
+                <div id="myModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog modal-sm">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Nova Categoria</h4>
+                      </div>
+                      <div class="modal-body">
+
+                        <form method="post" class="form-horizontal" action="categoria.php">
+                            <div class="form-group"><label class="control-label">Categoria</label>
+                                  <input type="text" class="form-control" name="categoria" id="categoria" value="" autofocus>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="submit" class="btn btn-primary" name="adicionar">Adicionar</button>
+                            </div>
+                        </form>
+
+                      </div>
+                    </div>
                   </div>
-              </div>
-            </div>
-        </div>
-    </div>
-</div>
+                </div>
 
 
 
